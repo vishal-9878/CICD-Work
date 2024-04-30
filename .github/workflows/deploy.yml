@@ -1,0 +1,41 @@
+# .github/workflows/deploy.yml
+name: Deploy to S3 and Clear CloudFront Cache
+on:
+  push:
+    branches:
+      - main  # Trigger workflow when code is pushed to 'main' branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install  # or 'yarn install'
+
+      # Build the React app
+      - name: Build React app
+        run: npm run build  # or 'yarn build'
+
+      # Upload to S3
+      - name: Sync build folder to S3
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: "build/ s3://work-bucket-vishal/"  # Update with your S3 bucket name
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      # Clear CloudFront Cache
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id my-distribution-id --paths "/*"  # Update with your CloudFront distribution ID
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
