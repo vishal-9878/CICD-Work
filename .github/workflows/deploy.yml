@@ -1,34 +1,57 @@
-name: Sync Folder to S3
-
+name: Build and Deploy to S3, Clear CloudFront Cache
 on:
   push:
     branches:
-      - main  # Change as needed
+      - main  # Adjust to the branch you want to trigger the workflow on
 
 jobs:
-  sync_with_s3:
+  build_and_deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Checkout Repository
+      # Step 1: Checkout the code
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Step 2: Configure AWS Credentials
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      # Step 2: Install dependencies
+      - name: Install Node.js and Dependencies
+        uses: actions/setup-node@v4
         with:
-          aws-access-key-id: ${{ secrets.KEY }}  # Correct input names
-          aws-secret-access-key: ${{ secrets.SECRET }}
-          aws-region: 'us-east-1'  # Adjust to your AWS region
+          node-version: '20'  # Updated to use Node.js 20
 
-      # Step 3: Install AWS CLI
+      #- run: npm i  # Install project dependencies
+      - run: npx create-react-app react-app  # Optionally, remove this step if you already have a React app
+
+      - name: Build React App
+      # Step 3: Build the React.js app
+        run: cd react-app && npm run build  # Build the React app
+
       - name: Install AWS CLI
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli  # Install AWS CLI
+          
+      # Step 4: Configure AWS CLI
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v3  # Set AWS credentials
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Use GitHub Secrets for credentials
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1' 
 
-      # Step 4: Sync Folder to S3
-      - name: Sync to S3
+      # Step 5: Sync build folder to S3
+      - name: Upload to S3
         run: |
-          aws s3 sync ./your-folder-name/ s3://your-s3-bucket-name/ --delete  # Adjust paths as needed
+          aws s3 sync react-app/build/ s3://work-bucket-vishal/ --delete 
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'
+
+      # Step 6: Clear CloudFront Cache
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id your-cloudfront-id --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'
