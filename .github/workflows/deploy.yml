@@ -28,7 +28,7 @@ jobs:
 
       # Step 4: Configure AWS CLI
       - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v2  # Set AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3  # Set AWS credentials
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Use GitHub Secrets for credentials
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
