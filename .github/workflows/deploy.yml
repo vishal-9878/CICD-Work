@@ -25,17 +25,25 @@ jobs:
       # Step 3: Build the React.js app
         run: cd react-app && npm run build  # Build the React app
 
-      # Step 4: Sync build folder to S3
+
+      # Step 4: Configure AWS CLI
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2  # Set AWS credentials
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Use GitHub Secrets for credentials
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1' 
+
+      # Step 5: Sync build folder to S3
       - name: Upload to S3
         run: |
-          cd react-app
-          aws s3 sync build/ s3://work-bucket-vishal/ 
+          aws s3 sync react-app/build/ s3://work-bucket-vishal/ --delete 
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'us-east-1'
 
-      # Step 5: Clear CloudFront Cache
+      # Step 6: Clear CloudFront Cache
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id your-cloudfront-id --paths "/*"
