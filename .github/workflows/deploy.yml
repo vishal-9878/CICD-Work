@@ -1,37 +1,34 @@
-name: Install AWS CLI and Run Commands
+name: Sync Folder to S3
 
 on:
   push:
     branches:
-      - main  # Modify as needed
+      - main  # Change as needed
 
 jobs:
-  install_aws_cli:
-    runs-on: ubuntu-latest  # Using the latest Ubuntu runner
+  sync_with_s3:
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout Repository
       - name: Checkout Repository
-        uses: actions/checkout@v4  # Ensures you have your repository's content
+        uses: actions/checkout@v3
 
-      # Step 2: Install AWS CLI
+      # Step 2: Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Correct input names
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'  # Adjust to your AWS region
+
+      # Step 3: Install AWS CLI
       - name: Install AWS CLI
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli  # Install AWS CLI
 
-      # Step 3: Configure AWS CLI
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3  # Configure AWS credentials
-        with:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'us-east-1'  # Adjust to your AWS region
-
-      # Step 4: Verify AWS CLI Installation
-      - name: Verify AWS CLI Installation
-        run: aws --version  # Check AWS CLI version
-
-      # Step 5: List S3 Buckets (for verification)
-      - name: List S3 Buckets
-        run: aws s3 ls  # List S3 buckets to ensure AWS CLI is working
+      # Step 4: Sync Folder to S3
+      - name: Sync to S3
+        run: |
+          aws s3 sync ./your-folder-name/ s3://your-s3-bucket-name/ --delete  # Adjust paths as needed
