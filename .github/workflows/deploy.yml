@@ -16,7 +16,7 @@ jobs:
       - name: Install Node.js and Dependencies
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Updated to use Node.js 20
+          node-version: '16'  # Updated to use Node.js 20
 
       - run: npm install  # Install project dependencies
       - run: npx create-react-app react-app  # Optionally, remove this step if you already have a React app
