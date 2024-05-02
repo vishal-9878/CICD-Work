@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 name: Build and Deploy to S3, Clear CloudFront Cache
 on:
   push:
@@ -20,25 +19,25 @@ jobs:
           node-version: '16'  # Adjust to the Node.js version you're using
       - run: npm install  # Install project dependencies
       - run: npx create-react-app react-app
-      
+
       # Step 3: Build the React.js app
       - name: Build React App
         run: cd react-app && npm run build  # Build the React app
-      
+
       # Step 4: Sync build folder to S3
       - name: Upload to S3
-        uses: s3-sync-action@v0.5.1  # Sync S3 with a GitHub Action
+        uses: jakejarvis/s3-sync-action@v1.0.0  # Correctly reference the S3 sync action
         with:
-          args: 'build/ s3://work-bucket-vishal/'  # Adjust to your S3 bucket name
+          args: 'react-app/build/ s3://work-bucket-vishal/ --delete'  # Adjusted the path and added the --delete option
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}  # AWS Access Key ID from GitHub Secrets
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Access Key from GitHub Secrets
-          AWS_REGION: 'us-east-1'  # The AWS region where your S3 bucket is located
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'  # Adjust to your region
 
       # Step 5: Clear CloudFront Cache
       - name: Invalidate CloudFront Cache
         run: |
-          aws cloudfront create-invalidation --distribution-id your-cloudfront-id --paths "/*"  # CloudFront cache invalidation
+          aws cloudfront create-invalidation --distribution-id your-cloudfront-id --paths "/*"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
