@@ -11,11 +11,11 @@ jobs:
     steps:
       # Step 1: Checkout the code
       - name: Checkout Repository
-        uses: vishal-9878/CICD-Work
+        uses: actions/checkout@v3
 
       # Step 2: Install dependencies
       - name: Install Node.js and Dependencies
-        uses: vishal-9878/CICD-Work
+        uses: actions/setup-node@v3
         with:
           node-version: '16'  # Adjust to the Node.js version you're using
       - run: npm install  # Install project dependencies
