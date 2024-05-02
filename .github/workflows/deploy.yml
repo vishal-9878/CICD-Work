@@ -16,10 +16,10 @@ jobs:
 
       # Step 2: Configure AWS Credentials
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Correct input names
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Correct input names
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'us-east-1'  # Adjust to your AWS region
 
       # Step 3: Install AWS CLI
@@ -27,3 +27,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli  # Install AWS CLI
+
+      # Step 4: Sync Folder to S3
+      - name: Sync to S3
+        run: |
+          aws s3 sync ./your-folder-name/ s3://your-s3-bucket-name/ --delete  # Adjust paths as needed
