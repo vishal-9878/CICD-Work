@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: '20'  # Updated to use Node.js 20
 
+      #- run: npm i  # Install project dependencies
       - run: npx create-react-app react-app  # Optionally, remove this step if you already have a React app
 
       - name: Build React App
@@ -28,8 +29,9 @@ jobs:
       - name: Upload to S3
         uses: jakejarvis/s3-sync-action@v0.5.1  # Correctly reference the S3 sync action
         with:
-          args: 'react-app/build/ s3://work-bucket-vishal/ --delete'  # Adjust to your S3 bucket name
+          args: 'react-app/build/ --delete'  # Adjust to your S3 bucket name
         env:
+          AWS_S3_BUCKET: 'work-bucket-vishal'
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'us-east-1'
